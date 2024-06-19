@@ -1,4 +1,4 @@
-﻿namespace NugetTools
+﻿namespace CleanTools
 {
 	internal class NugetCacheCleaner
 	{

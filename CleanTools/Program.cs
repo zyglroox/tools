@@ -1,4 +1,4 @@
-﻿using NugetTools;
+﻿using CleanTools;
 
 NugetCacheCleaner.Clean();
 Console.ReadLine();
