@@ -13,11 +13,23 @@ internal class PowershellCommandsCleaner
 		var allLines = await File.ReadAllLinesAsync(sourceFile);
 		Console.WriteLine($"File contains {allLines.Length} lines");
 
-		File.Copy(sourceFile, backupFile);
+		File.Copy(sourceFile, backupFile, true);
 		Console.WriteLine($"Backup file created: {backupFile}");
 		
 		var uniqueLines = allLines.ToHashSet();
-		await File.WriteAllLinesAsync(sourceFile, uniqueLines);
-		Console.WriteLine($"Deleted duplicate lines, {uniqueLines.Count} left");
+
+		var orderedResult = new List<string>();
+		foreach (var line in allLines.Reverse())
+		{
+			if (!uniqueLines.Contains(line))
+				continue;
+
+			orderedResult.Add(line);
+			uniqueLines.Remove(line);
+		}
+
+		orderedResult.Reverse();
+		await File.WriteAllLinesAsync(sourceFile, orderedResult);
+		Console.WriteLine($"Deleted duplicate lines, {orderedResult.Count} lines left");
 	}
 }
