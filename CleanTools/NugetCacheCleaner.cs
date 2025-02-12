@@ -7,9 +7,9 @@ internal class NugetCacheCleaner
 		var nugetCacheFolder = $@"{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\.nuget\packages\";
 		var directoryInfo = new DirectoryInfo(nugetCacheFolder);
 		long totalDeletedSize = 0;
-		foreach (var folder in directoryInfo.GetDirectories())
+		foreach (DirectoryInfo folder in directoryInfo.GetDirectories())
 		{
-			foreach (var versionFolder in folder.GetDirectories())
+			foreach (DirectoryInfo versionFolder in folder.GetDirectories())
 			{
 				var allFiles = versionFolder.GetFiles("*.*", SearchOption.AllDirectories);
 
@@ -21,9 +21,9 @@ internal class NugetCacheCleaner
 				if (files.Length == 0)
 					continue;
 
-				var lastAccessTime = files.Max(x => x.LastAccessTime);
+				DateTime lastAccessTime = files.Max(x => x.LastAccessTime);
 				var folderSize = allFiles.Sum(x => x.Length);
-				var lastAccessed = DateTime.Now - lastAccessTime;
+				TimeSpan lastAccessed = DateTime.Now - lastAccessTime;
 
 				if (lastAccessed <= TimeSpan.FromDays(minDays))
 					continue;
