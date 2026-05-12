@@ -104,7 +104,36 @@ if ($userResponse -eq "Y") {
         git push --set-upstream origin main
     }
 } else {
-    # Ask for branch name to checkout
     $branchName = Read-Host "Enter the branch name you want to checkout"
-    git checkout $branchName
+
+    # Check if the branch exists locally
+    $branchExistsLocal = git show-ref --verify --quiet "refs/heads/$branchName"
+
+    # Check if the branch exists remotely
+    $branchExistsRemote = git ls-remote --exit-code --heads origin $branchName 2>$null
+
+    if ($branchExistsLocal -or $branchExistsRemote) {
+        git checkout $branchName
+    } else {
+        Write-Host "Branch '$branchName' does not exist. Attempting to create it..."
+
+        # Check if 'main' exists locally or remotely
+        $mainExistsLocal = git show-ref --verify --quiet "refs/heads/main"
+        $mainExistsRemote = git ls-remote --exit-code --heads origin main 2>$null
+
+        if ($mainExistsLocal) {
+            git checkout main
+        } elseif ($mainExistsRemote) {
+            git fetch origin main
+            git checkout main
+        } else {
+            Write-Host "'main' branch doesn't exist locally or remotely. Creating an orphan branch."
+            git checkout --orphan main
+            git commit --allow-empty -m "Initial commit on orphan main branch"
+        }
+
+        # Now create the new branch
+        git checkout -b $branchName
+        Write-Host "Branch '$branchName' created and checked out."
+    }
 }
